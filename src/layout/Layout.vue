@@ -36,12 +36,18 @@
         <a-layout :style="{ marginLeft: '200px' }">
           <a-layout-header :style="{ background: '#fff', padding: 0 }">
             <a-menu mode="horizontal" v-model:selectedKeys="model">
-                <a-menu-item key="1" @click="regetting">
+                <a-menu-item key="1">
                     <template #icon>
                         <up-circle-outlined />
                     </template>
                     上传文件
                 </a-menu-item>
+                <a-menu-item key="2" @click="newCreate">
+                  <template #icon>
+                    <folder-open-outlined />
+                  </template>
+                  新建文件夹
+              </a-menu-item>
             </a-menu>
           </a-layout-header>
           <a-layout-content :style="{ margin: '5px 16px 0', overflow: 'initial' }">
@@ -83,18 +89,25 @@
       </a-layout>
 </template>
 <script setup lang="ts">
+
+      //取消选中并且取消右键操作
+        document.body.oncontextmenu =
+        function () {
+            return false; //取消浏览器默认操作
+        };
+
     import { 
         FolderOpenTwoTone,
         PictureTwoTone,
         VideoCameraTwoTone,
         UpCircleOutlined,
+        FolderOpenOutlined,
     } from '@ant-design/icons-vue'
     import { defineComponent,ref,reactive,watch,nextTick } from 'vue'
 
     // 卡片信息
     interface CardData{
       display:boolean,
-      count:int,
       text:string,
       src:string,
       key:string,
@@ -106,35 +119,46 @@
     // const display = ref<boolean>(true) 
 
     const listData = reactive<CardData[20]>([])
-    const model = ref<string[1]>(["0"])
+    const model = ref<string[10]>(["0"])
     const refin = ref({})
 
     for (let i = 0; i < 12; i++) {
         listData.push({
           src:"https://huyi-1312710090.cos.ap-guangzhou.myqcloud.com/image%2F%E6%96%87%E4%BB%B6%E5%A4%B9.jpeg",
           display:true,
-          count:0,
           text:"我的资源",
           key:"我的资源",
           index:i
         })
     }
 
-
     // ref绑定的函数
     function in_ref(el,key) {
       refin[key] = el
     }
+
     //双击
     async function double_click(params) {
         params.display = false
-        console.log(params);
         await nextTick(()=>{
           refin[params.index].focus()
-            // this.$refs[params.text].focus()
-            // console.log(this.$refs[`text${params.index}`])
         })
     }
+
+    function newCreate(params) {
+      const i = listData.length - 1
+      listData.push({
+          src:"https://huyi-1312710090.cos.ap-guangzhou.myqcloud.com/image%2F%E6%96%87%E4%BB%B6%E5%A4%B9.jpeg",
+          display:false,
+          text:"",
+          key:"",
+          index:i
+        })
+        nextTick(()=>{
+          refin[i].focus()
+        })
+    }
+
     // 回车
     function Undisplay(params) {
       params.display = true
@@ -142,12 +166,7 @@
 
     // 用于实现取消导航栏选中
     watch(model,(newQuestion, oldQuestion)=>{
-        console.log(newQuestion, oldQuestion)
-        if(newQuestion[0].indexOf('1') > -1){
-            console.log(model.value[0])
-            model.value[0] = "0"
-        }
-        console.log("model值改变了");
+        model.value[0] = "0"
     })
 
 </script>
