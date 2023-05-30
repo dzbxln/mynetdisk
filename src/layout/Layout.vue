@@ -47,24 +47,30 @@
 
     import Sider from '@/components/Sider.vue'
     import { ref,reactive,watch } from 'vue'
+    import { useStore } from 'vuex';
     import {
         UpCircleOutlined,
         FolderOpenOutlined,
     } from '@ant-design/icons-vue'
     const model = ref<string[10]>(["0"])
+    const store = useStore();
+
 
     // 用于实现取消导航栏选中
     watch(model, (newQuestion, oldQuestion) => {
         model.value[0] = "0"
     })
-    //取消右键操作
-    document.body.oncontextmenu =
-        function () {
-            return false; //取消浏览器默认操作
-        }
 
-    function newCreate(params){
-        
+    function newCreate(params) {
+        const i = store.state.CardData.length
+        const s = {
+            src: "https://huyi-1312710090.cos.ap-guangzhou.myqcloud.com/image%2F%E6%96%87%E4%BB%B6%E5%A4%B9.jpeg",
+            display: false,
+            text: "",
+            key: "",
+            index: i
+        }
+        store.commit('addData',s)
     }
 
 </script>

@@ -1,8 +1,9 @@
 <template>
-    <div :style="{ padding: '20px', background: '#fff',height:'560px' , textAlign: 'center' }">
+    <div :style="{ padding: '20px', background: '#fff',height:'560px' , textAlign: 'center',position:'relative' }">
         <a-list :grid="{ gutter: 16, column: 8 }" :data-source="listData">
             <template #renderItem="{ item }">
                 <a-list-item>
+                    <a-dropdown :trigger="['contextmenu']">
                     <a-card hoverable style="width: 120px">
                         <template #cover>
                             <img
@@ -21,6 +22,27 @@
                                      v-model:value="item.text" v-if="!item.display"/>
                         </template>
                     </a-card>
+                    <template #overlay>
+                        <a-menu>
+                          <a-menu-item key="1">
+                            <folder-open-filled />
+                            打开</a-menu-item>
+                          <a-menu-item key="2">
+                            <eye-filled />
+                            查看</a-menu-item>
+                          <a-menu-item key="3" @click="double_click(item)">
+                            <edit-filled />
+                            重命名</a-menu-item>
+                          <a-menu-item key="4" @click="newCreate">
+                            <folder-add-filled />
+                            新建文件夹</a-menu-item>
+                          <a-menu-item />
+                          <a-menu-item key="5" @click="deleteFolder(item)">
+                            <delete-filled />
+                            删除</a-menu-item>
+                        </a-menu>
+                    </template>
+                </a-dropdown>
                 </a-list-item>
             </template>
         </a-list>
@@ -28,13 +50,21 @@
 </template>
 <script setup lang="ts">
     import {
+        FolderOpenFilled,
+        EditFilled,
+        DeleteFilled,
+        ToolFilled,
+        EyeFilled,
+        FolderAddFilled,
         FolderOpenTwoTone,
         PictureTwoTone,
         VideoCameraTwoTone,
         UpCircleOutlined,
         FolderOpenOutlined,
     } from '@ant-design/icons-vue'
-    import {defineComponent, ref, reactive, watch, nextTick} from 'vue'
+    import {defineComponent, ref, reactive, watch, nextTick,onMounted,computed} from 'vue'
+    import { useStore } from 'vuex';
+    import { message } from 'ant-design-vue'
 
     // 卡片信息
     interface CardData {
@@ -44,20 +74,63 @@
         key: string,
         index: int,
     }
+    // 两个显示判定
+    const display = ref(false)
+    const display_d = ref(false)
+
+    const store = useStore();
+    const arrayLength = computed(() => store.state.CardData.length)
+
+    // 菜单的样式
+    const styleObject = reactive({
+        left:'',
+        top:'',
+        position:'absolute'
+    })
+
+    // 监听数组长度变化
+    watch(arrayLength, (newQuestion, oldQuestion) => {
+        addData()
+        if(newQuestion > oldQuestion){
+            nextTick(() => {
+            refin[store.state.CardData.length - 1].focus()
+            })
+        }
+    })
 
     const selectedKeys = ref<string[1]>(["1"])
     const listData = reactive<CardData[20]>([])
     const model = ref<string[10]>(["0"])
     const refin = ref({})
+    
+    onMounted(()=>{
+        addData()
+    })
 
-    for (let i = 0; i < 12; i++) {
-        listData.push({
+    // 新建文件夹
+    function newCreate(params) {
+        const i = store.state.CardData.length
+        const s = {
             src: "https://huyi-1312710090.cos.ap-guangzhou.myqcloud.com/image%2F%E6%96%87%E4%BB%B6%E5%A4%B9.jpeg",
-            display: true,
-            text: "我的资源",
-            key: "我的资源",
+            display: false,
+            text: "",
+            key: "",
             index: i
-        })
+        }
+        store.commit('addData',s)
+    }
+
+    // 删除文件夹
+    function deleteFolder(params) {
+        store.commit('deleteData',params)
+    }
+
+    // 列表更新
+    function addData(params) {
+        listData.splice(0,listData.length)
+        for (let i = 0;i < store.state.CardData.length; i++){
+            listData.push(store.state.CardData[i])
+        }
     }
 
     // ref绑定的函数
@@ -73,23 +146,23 @@
         })
     }
 
-    // function newCreate(params) {
-    //     const i = listData.length - 1
-    //     listData.push({
-    //         src: "https://huyi-1312710090.cos.ap-guangzhou.myqcloud.com/image%2F%E6%96%87%E4%BB%B6%E5%A4%B9.jpeg",
-    //         display: false,
-    //         text: "",
-    //         key: "",
-    //         index: i
-    //     })
-    //     nextTick(() => {
-    //         refin[i].focus()
-    //     })
-    // }
-
-    // 回车
+    // 回车|失去焦点
     function Undisplay(params) {
-        params.display = true
+        if (!params.text || params.text.trim().length === 0){
+            message.error('名称不能为空！');
+            refin[params.index].focus()
+        }
+        else{
+            params.display = true
+            for (let i = 0; i < listData.length; i++){
+                if(params.text === listData[i].text && i != params.index){
+                    message.error('名称不能相同！')
+                    params.display = false
+                    refin[params.index].focus()
+                }
+            }
+        }
+        
     }
 </script>
 <style>

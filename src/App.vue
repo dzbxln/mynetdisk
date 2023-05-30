@@ -2,6 +2,13 @@
   <router-view/>
 </template>
 
+<script setup lang="ts">
+  import { message } from 'ant-design-vue'
+  message.config({
+    maxCount: 3,
+  })
+</script>
+
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
