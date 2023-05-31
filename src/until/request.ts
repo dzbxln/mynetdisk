@@ -11,11 +11,11 @@ const request = axios.create({
 // 比如统一加token，对请求参数统一加密
 request.interceptors.request.use(config => {
     config.headers['Content-Type'] = 'application/json;charset=utf-8';
-  let userjson = sessionStorage.getItem("user")
-  let staffjson = sessionStorage.getItem("staff")
-  if(!userjson&&!staffjson){
-    router.push('/')
-  }
+//   let userjson = sessionStorage.getItem("user")
+//   let staffjson = sessionStorage.getItem("staff")
+//   if(!userjson&&!staffjson){
+//     router.push('/')
+//   }
  // config.headers['token'] = user.token;  // 设置请求头
     return config
 }, error => {
