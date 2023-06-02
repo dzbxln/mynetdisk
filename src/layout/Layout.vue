@@ -25,14 +25,10 @@
             <a-layout-content :style="{ margin: '5px 16px 0', overflow: 'initial' }">
                 <div>
                     <a-breadcrumb>
-                        <a-breadcrumb-item>文件夹</a-breadcrumb-item>
-                        <a-breadcrumb-item>
-                            <a>下一个</a>
+                        <a-breadcrumb-item><a @click="updateMasterId('根目录')">根目录</a></a-breadcrumb-item>
+                        <a-breadcrumb-item v-for="item in breadcrumb">
+                            <a @click="updateMasterId(item)">{{item.folderName}}</a>
                         </a-breadcrumb-item>
-                        <a-breadcrumb-item>
-                            <a>下一个</a>
-                        </a-breadcrumb-item>
-                        <a-breadcrumb-item>下一个</a-breadcrumb-item>
                     </a-breadcrumb>
                 </div>
                 <router-view/>
@@ -52,13 +48,18 @@
         UpCircleOutlined,
         FolderOpenOutlined,
     } from '@ant-design/icons-vue'
+    import request from '../until/request'
     const model = ref<string[10]>(["0"])
     const store = useStore();
-
+    const breadcrumb = ref([])
 
     // 用于实现取消导航栏选中
     watch(model, (newQuestion, oldQuestion) => {
         model.value[0] = "0"
+    })
+
+    watch(()=>store.state.masterId, (newQuestion,oldQuestion)=>{
+        getData(newQuestion)
     })
 
     function newCreate(params) {
@@ -71,6 +72,28 @@
             index: i
         }
         store.commit('addData',s)
+    }
+
+    // 修改父文件夹id
+    function updateMasterId(params) {
+        if(params === "根目录"){
+            store.state.masterId = ""
+        }else{
+            store.state.masterId = params.folderId
+        }
+    }
+
+    // 获取数据
+    function getData(params) {
+        if(params != undefined){
+            request.get("/get_breadcrumb",{
+                params:{
+                    masterId:params
+                }
+            }).then(res=>{
+                breadcrumb.value = res.data
+            })
+        }
     }
 
 </script>

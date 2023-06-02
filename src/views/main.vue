@@ -7,6 +7,7 @@
                     <a-card hoverable style="width: 120px">
                         <template #cover>
                             <img
+                                    @dblclick="open(item)"
                                     :style="{padding: '5px'}"
                                     :width="110"
                                     :higth="110"
@@ -91,7 +92,13 @@
     // 监听数组长度变化
     watch(arrayLength, (newQuestion, oldQuestion) => {
         addData()
-        if(newQuestion > oldQuestion){
+        let isor = false
+        for(let i = 0; i < store.state.CardData.length; i++){
+            if(!store.state.CardData[i].folderName || store.state.CardData[i].folderName.trim().length === 0){
+                isor = true
+            }
+        }
+        if(newQuestion > oldQuestion && isor){
             nextTick(() => {
                 let key = ''
                 for(let i = 0; i < store.state.CardData.length; i++){
@@ -99,16 +106,34 @@
                         key = i
                     }
                 }
-                console.log(store.state.CardData);
                 refin[key].focus()
             })
         }
+    })
+
+    // 监听父文件id
+    watch(()=>store.state.masterId,(newQuestion,oldQuestion)=>{
+        let form = {
+            fId:store.state.masterId
+        }
+        if(!store.state.masterId || store.state.masterId.trim().length === 0){
+            getData()
+        }else{
+            getData(form)
+        }
+        
     })
 
     
     onMounted(()=>{
         getData()
     })
+
+    // 打开文件夹
+    function open(params) {
+        // console.log(params);
+        getData(params)
+    }
 
     // 新建文件夹
     function newCreate(params) {
@@ -119,9 +144,10 @@
             }
         }
         if(isor){
-            const form = {}
-            form.image = "https://huyi-1312710090.cos.ap-guangzhou.myqcloud.com/image%2F%E6%96%87%E4%BB%B6%E5%A4%B9.jpeg",
-            form.masterFolderId = store.state.masterId,
+            const form = {
+                image: "https://huyi-1312710090.cos.ap-guangzhou.myqcloud.com/image%2F%E6%96%87%E4%BB%B6%E5%A4%B9.jpeg",
+                masterFolderId: store.state.masterId,
+            }
             request.post("/create_folder",form).then(res=>{
                 res.data.display = false
                 store.commit('addData',res.data)
@@ -145,7 +171,7 @@
         listData.splice(0,listData.length)
         for (let i = 0;i < store.state.CardData.length; i++){
             listData.push(store.state.CardData[i])
-            if(!listData === undefined){
+            if(listData[i].display === undefined || listData[i].display === null){
                 listData[i].display = true
             }
             listData[i].index = i
@@ -219,10 +245,9 @@
                 params:{
                     fId:''
                 }
-            }).then(res=>{
-                console.log(res.data);
-                store.commit('coverData',res.data)
-                store.state.masterId = res.data[0].masterFolderId
+            }).then(r=>{
+                store.commit('coverData',r.data)
+                store.state.masterId = r.data[0].masterFolderId
                 addData()
             })
         }else{
@@ -232,7 +257,13 @@
                 }
             }).then(r=>{
                 store.commit('coverData',r.data)
-                store.state.masterId = res.data[0].masterFolderId
+                console.log(r.data);
+                if(!r.data || r.data.length === 0){
+                    store.state.masterId = res.fId
+                    console.log("文件夹下没有文件");
+                }else{
+                    store.state.masterId = r.data[0].masterFolderId
+                }
                 addData()
             })
         }
