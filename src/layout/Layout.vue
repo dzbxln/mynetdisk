@@ -1,8 +1,6 @@
 <template>
     <a-layout has-sider>
-        <a-layout-sider
-                :style="{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0 }"
-        >
+        <a-layout-sider :style="{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0 }">
             <Sider></Sider>
         </a-layout-sider>
         <a-layout :style="{ marginLeft: '200px' }">
@@ -10,13 +8,13 @@
                 <a-menu mode="horizontal" v-model:selectedKeys="model">
                     <a-menu-item key="1">
                         <template #icon>
-                            <up-circle-outlined/>
+                            <up-circle-outlined />
                         </template>
                         上传文件
                     </a-menu-item>
                     <a-menu-item key="2" @click="newCreate">
                         <template #icon>
-                            <folder-open-outlined/>
+                            <folder-open-outlined />
                         </template>
                         新建文件夹
                     </a-menu-item>
@@ -31,7 +29,7 @@
                         </a-breadcrumb-item>
                     </a-breadcrumb>
                 </div>
-                <router-view/>
+                <router-view />
             </a-layout-content>
             <a-layout-footer :style="{ textAlign: 'center' }">
                 DengZebin netdisk @2023 by play
@@ -40,16 +38,21 @@
     </a-layout>
 </template>
 <script setup lang="ts">
-
     import Sider from '@/components/Sider.vue'
-    import { ref,reactive,watch } from 'vue'
-    import { useStore } from 'vuex';
+    import {
+        ref,
+        reactive,
+        watch
+    } from 'vue'
+    import {
+        useStore
+    } from 'vuex';
     import {
         UpCircleOutlined,
         FolderOpenOutlined,
     } from '@ant-design/icons-vue'
     import request from '../until/request'
-    const model = ref<string[10]>(["0"])
+    const model = ref < string[10] > (["0"])
     const store = useStore();
     const breadcrumb = ref([])
 
@@ -58,7 +61,7 @@
         model.value[0] = "0"
     })
 
-    watch(()=>store.state.masterId, (newQuestion,oldQuestion)=>{
+    watch(() => store.state.masterId, (newQuestion, oldQuestion) => {
         getData(newQuestion)
     })
 
@@ -71,31 +74,30 @@
             key: "",
             index: i
         }
-        store.commit('addData',s)
+        store.commit('addData', s)
     }
 
     // 修改父文件夹id
     function updateMasterId(params) {
-        if(params === "根目录"){
+        if (params === "根目录") {
             store.state.masterId = ""
-        }else{
+        } else {
             store.state.masterId = params.folderId
         }
     }
 
     // 获取数据
     function getData(params) {
-        if(params != undefined){
-            request.get("/get_breadcrumb",{
-                params:{
-                    masterId:params
+        if (params != undefined) {
+            request.get("/get_breadcrumb", {
+                params: {
+                    masterId: params
                 }
-            }).then(res=>{
+            }).then(res => {
                 breadcrumb.value = res.data
             })
         }
     }
-
 </script>
 <style>
     #components-layout-demo-fixed-sider .logo {

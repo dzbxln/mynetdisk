@@ -5,12 +5,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'Layout',
     component: () => import('../layout/Layout.vue'),
-    redirect:"/main",
-    children:[
+    redirect: "/main",
+    children: [
       {
-        path:'/main',
-        name:'Main',
-        component:() => import('../views/main.vue')
+        path: '/main',
+        name: 'Main',
+        component: () => import('../views/main.vue')
       }
     ]
   }
